@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 
 class Dice():
-    def __init__(self, sides = None):
+    def __init__(self, sides = None, random = random):
         if sides is None:
             sides = 1
         self.sides = [(i+1) for i in range(sides)]
@@ -13,6 +13,7 @@ class Dice():
         self.lastTime = [1 for _ in range(sides)]
         self.total = 0
         self.weighted = False
+        self.rng = random
 
     def roll(self, time = 10, returnType = "number"):
         sTime = datetime.now()
@@ -21,7 +22,7 @@ class Dice():
         for i in range(len(self.lastTime)):
             total += self.lastTime[i]
 
-        num = random.randint(1, total)
+        num = self.rng.randint(1, total)
         #find the side that corresponds to the number
         s = 0 # sum
         for i in range(len(self.lastTime)):
@@ -189,6 +190,9 @@ class Dice():
     def getSides(self):
         return self.sides, len(self.sides)
 
+    def setrng(self, engine):
+        self.rng = engine
+
 def findAll(d = None, sides = 6):
     count = 0
     rolls = [0 for _ in range(sides)] # the amount of roles for each side
@@ -262,11 +266,10 @@ def main():
 
         print(f"Balanced Dice: {e1/n} || Random Dice: {e2/n}")
 
-    sides = 50
+    sides = 20
     d = Dice(sides=sides)
 
     Convergence(d, None, sides, 10000, output = True)
-    exit()
     Probability(d, None, sides, 1000000, output = False)
     ExpectedValue(d, None, sides, 1000000, output = False)
 
