@@ -2,10 +2,48 @@ import pygame
 import datetime
 from dice import Dice
 
+class multiline:
+    def __init__(self, text, font = None, color = (255, 255, 255), width = 600):
+        self.text = text
+        self.font = font
+        self.color = color
+        self.width = width
+        self.lines = [""]
+        self.rendered = [""]
+        self.breakdown()
+        self.render()
+    
+    def update(self, text):
+        self.text = text
+        self.lines = [""]
+        self.rendered = [""]
+        self.breakdown()
+        self.render()
+        return self
+
+    def breakdown(self):
+        for character in self.text:
+            if self.font.size(self.lines[-1] + character)[0] > self.width:
+                self.lines.append(character)
+            else:
+                self.lines[-1] += character
+
+    def render(self):
+        # render the text
+        self.rendered = [self.font.render(line, True, self.color) for line in self.lines]
+        return self.rendered
+
+    def getText(self):
+        return self.lines
+    
+    def getRendered(self):
+        return self.rendered
+    
+    def getHeight(self):
+        return sum([line.get_height() for line in self.rendered])
 
 # Initialize Pygame
 pygame.init()
-
 # Set screen dimensions and title
 screen = pygame.display.set_mode((600, 600))
 bg = pygame.image.load("bg.png")
@@ -18,20 +56,31 @@ GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 # List of text items (these could be loot box rewards or items)
 
-# Load font (you can change this to any font you like)
-mainFont = pygame.font.SysFont("Arial", 72)
+# These sizes probably need to be adjusted
+mainFont = pygame.font.SysFont("Arial", 48)
 secondaryFont = pygame.font.SysFont("Arial", 36)
-smallFont = pygame.font.SysFont("Arial", 36)
+smallFont = pygame.font.SysFont("Arial", 24)
 # Function to render text as a surface
-winner_text = secondaryFont.render("winner", True, WHITE)
+winner_text = secondaryFont.render("Winner", True, WHITE)
 # Create a scrolling effect (simulated loot box items rolling through)
 frames = 20
 fps = 1 / frames  # Frames per second
 
+lineMapper = multiline("This is a test of the multiline class", secondaryFont, (255, 255, 255), 550)
+# shorten = Shortline()
 def animate_loot_box(spinTime = 10):
 
-    def render_text(text, font):
-        return font.render(text, True, WHITE)
+    def render_text(text, font, multiline = False):
+        if multiline:
+            return lineMapper.update(text).getRendered()
+        oldText = text
+        newText = oldText
+        tempText = "..." + newText + "..."
+        while (font.size(tempText)[0] > 300):
+            newText = newText[1:-1]
+            tempText = "..." + newText + "..."
+        newText = "..." + newText + "..." 
+        return font.render(newText, True, WHITE)
 
     def getText(rendered_texts, index):
         i = (index+len(rendered_texts)) % len(rendered_texts)
@@ -53,16 +102,16 @@ def animate_loot_box(spinTime = 10):
         # create a new surface for the text
         # draw a box around the text
         # display both
+        lineMapper.update(text_items[index])
+        temp = lineMapper
 
-
-        box_g = BLUE
-        box_w = WHITE
-        box_b = GREEN
-        temp = getText(secondary_texts, searchIndex)
-        pygame.draw.rect(screen, box_g, (20, 450, 550, temp.get_height())) # outer box
-        pygame.draw.rect(screen, box_b, (20, 450 + winner_text.get_height(), 550, temp.get_height())) # outer box
+        pygame.draw.rect(screen, BLUE, (20, 450, 550, temp.getHeight()), border_top_left_radius= 6, border_top_right_radius= 6) # outer box
+        pygame.draw.rect(screen, GREEN, (20, 450 + winner_text.get_height(), 550, temp.getHeight()), border_bottom_left_radius= 6, border_bottom_right_radius= 6)
         screen.blit(winner_text, (25, 450))
-        screen.blit(temp, (25, 450 + winner_text.get_height()))
+        h = winner_text.get_height() + 450
+        for l in temp.getRendered():
+            screen.blit(l, (25, h))
+            h+=l.get_height()
 
 
 
@@ -73,8 +122,10 @@ def animate_loot_box(spinTime = 10):
         x = 10
         y = 10
         for i in range(len(text_items)):
-            screen.blit(small_texts[i], (x, y))
-            y += small_texts[i].get_height()
+            # screen.blit(small_texts[i][0], (x, y))
+            for j in range(len(small_texts[i])):
+                screen.blit(small_texts[i][j], (x, y))
+                y += small_texts[i][j].get_height()
 
     running = True
     index = 0  # Index of the current
@@ -89,9 +140,9 @@ def animate_loot_box(spinTime = 10):
     scrollSpeed = 10 # Speed of the scrolling effect
     lFrame = 0 # Frame counter
 
-
     d = Dice()
-    d.setSidesWithWeights(["One", "Two", "Three", "Four", "Five", "Six"], [1, 1, 1, 3, 1, 2])
+    # d.setSidesWithWeights(["One", "Two", "Three", "Four", "Five", "Six"], [1, 1, 1, 3, 1, 2])
+    d.setSidesWithWeights(["One is the loneliest number the world has ever seen", "Two is a pear like the fruit but not red like an apple"], [1, 1])
     text_items = d.getItems()
     r = d.roll(time=-1, returnType="side")
     print(text_items)
@@ -106,7 +157,7 @@ def animate_loot_box(spinTime = 10):
     searchIndex = findInList(r, text_items)
     rendered_texts = [render_text(text, mainFont) for text in text_items]
     secondary_texts = [render_text(text, secondaryFont) for text in text_items]
-    small_texts = [render_text(text, smallFont) for text in text_items]
+    small_texts = [render_text(text, smallFont, multiline=True) for text in text_items]
 
     while running:
         for event in pygame.event.get():
@@ -127,9 +178,6 @@ def animate_loot_box(spinTime = 10):
                         print("Restarted")
                 if event.key == pygame.K_i:
                     print(pygame.mouse.get_pos())
-
-        # we are drawwing at 1 fps
-        # screen.blit(bg, (15,-105))
 
         if datetime.datetime.now() - lTime > datetime.timedelta(seconds=fps):
             lTime = datetime.datetime.now() # Resetting the timer
@@ -184,4 +232,4 @@ def animate_loot_box(spinTime = 10):
     pygame.quit()
 
 # Start the animation
-animate_loot_box()
+animate_loot_box(5)
