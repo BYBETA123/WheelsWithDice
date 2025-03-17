@@ -42,6 +42,30 @@ class multiline:
     def getHeight(self):
         return sum([line.get_height() for line in self.rendered])
 
+
+# we can use D6.txt as an example of a dice that can be used
+# we can use the dice class to create a dice object
+wheelpth = "wheels/"
+# we just start with D6
+filePath = wheelpth + "D6.txt"
+with open(filePath, "r") as f:
+    text_lines = f.readlines()
+
+print(text_lines)
+text_weights, text_items = [], []
+for l in text_lines:
+    try: 
+        line = l.strip()
+        a = line.index(" ")
+        text_weights.append(int(line[:a]))
+        text_items.append(line[a+1:])
+    except:
+        print(f"Error in parsing the line, check the file for any errors\n The line is: {l} and the file is {filePath}\n, The appropriate format: <weight> <text>")
+
+print(text_weights, text_items)
+dice_lines = text_items
+dice_weights = text_weights
+
 # Initialize Pygame
 pygame.init()
 # Set screen dimensions and title
@@ -57,7 +81,7 @@ BLUE = (0, 0, 255)
 # List of text items (these could be loot box rewards or items)
 
 # These sizes probably need to be adjusted
-mainFont = pygame.font.SysFont("Arial", 48)
+mainFont = pygame.font.SysFont("Arial", 72)
 secondaryFont = pygame.font.SysFont("Arial", 36)
 smallFont = pygame.font.SysFont("Arial", 24)
 # Function to render text as a surface
@@ -65,6 +89,7 @@ winner_text = secondaryFont.render("Winner", True, WHITE)
 # Create a scrolling effect (simulated loot box items rolling through)
 frames = 20
 fps = 1 / frames  # Frames per second
+globalHide = False
 
 lineMapper = multiline("This is a test of the multiline class", secondaryFont, (255, 255, 255), 550)
 # shorten = Shortline()
@@ -75,6 +100,9 @@ def animate_loot_box(spinTime = 10):
             return lineMapper.update(text).getRendered()
         oldText = text
         newText = oldText
+        # sanity check that it is less than 300 pixels wide
+        if font.size(oldText)[0] < 300:
+            return font.render(oldText, True, WHITE) # exit early
         tempText = "..." + newText + "..."
         while (font.size(tempText)[0] > 300):
             newText = newText[1:-1]
@@ -141,9 +169,12 @@ def animate_loot_box(spinTime = 10):
     lFrame = 0 # Frame counter
 
     d = Dice()
-    # d.setSidesWithWeights(["One", "Two", "Three", "Four", "Five", "Six"], [1, 1, 1, 3, 1, 2])
-    d.setSidesWithWeights(["One is the loneliest number the world has ever seen", "Two is a pear like the fruit but not red like an apple"], [1, 1])
-    text_items = d.getItems()
+    # dice_lines = ["One", "Two", "Three", "Four", "Five", "Six"]
+    # dice_weights = [1, 1, 1, 3, 1, 2]
+    d.setSidesWithWeights(dice_lines, dice_weights)
+    # d.setSidesWithWeights(["One is the loneliest number the world has ever seen", "Two is a pear like the fruit but not red like an apple"], [1, 1])
+    text_items = d.getItems(hide = globalHide)
+
     r = d.roll(time=-1, returnType="side")
     print(text_items)
 
@@ -212,7 +243,7 @@ def animate_loot_box(spinTime = 10):
                 screen.blit(getText(rendered_texts, index), (base_x - getText(rendered_texts, index).get_width()//2, base_y - getText(rendered_texts, index).get_height()//2))
                 screen.blit(getText(secondary_texts, index + 1), (base_x - getText(secondary_texts, index + 1).get_width()//2, base_y + getText(secondary_texts, index + 1).get_height()*1.5 ))
 
-                drawOptions()
+                # drawOptions()
 
             if selected: # in case it didn't actually reach 100%
 

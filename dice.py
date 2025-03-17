@@ -108,8 +108,7 @@ class Dice():
         self.total = 0
         self.weighted = True
         
-    def getItems(self):
-
+    def getItems(self, hide = False):
         tempDictionary = {}
         dupes = []
         c = []
@@ -124,7 +123,10 @@ class Dice():
 
         # The dictinoary should be updated such that the copies are updated
         for i in range(len(dupes)):
-            tempDictionary[f'{dupes[i]}({c[i]})'] = tempDictionary.pop(dupes[i])
+            if hide:
+                tempDictionary[f'{dupes[i]}'] = tempDictionary.pop(dupes[i])
+            else:
+                tempDictionary[f'{dupes[i]}({c[i]})'] = tempDictionary.pop(dupes[i])
 
         return list(tempDictionary.keys())
 
