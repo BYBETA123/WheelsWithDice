@@ -68,7 +68,22 @@ class Dice():
             print(s, end='\n')
 
         if returnType == "number":
-            return num
+            a = self.sides
+            b = ["" for _ in range(len(self.sides))]
+            c = [1 for _ in range(len(self.sides))]
+            last = a[0] # the first value
+            counter = 0
+
+            for i in range(1, len(a)): # don't start at 0
+                t = a[i]
+                b[counter] = last
+                if t == last:
+                    c[counter] += 1
+                else:
+                    counter += 1
+                    last = t
+
+            return b.index(a[num-1]) + 1
         elif returnType == "side":
             return self.sides[num - 1]
         else:
@@ -189,6 +204,26 @@ class Dice():
         plt.grid(True)
         plt.show()
 
+    def getDetails(self):
+        print("================================")
+        a = self.sides
+        b = ["" for _ in range(len(self.sides))]
+        c = [1 for _ in range(len(self.sides))]
+        last = a[0] # the first value
+        counter = 0
+
+        for i in range(1, len(a)): # don't start at 0
+            t = a[i]
+            b[counter] = last
+            if t == last:
+                c[counter] += 1
+            else:
+                counter += 1
+                last = t
+        b[counter] = last # assign the last
+        counter += 1 # one extra to avoid upper bound
+        return [b[:counter], c[:counter], self.rollCount, self.lastTime]
+
     def getSides(self):
         return self.sides, len(self.sides)
 
@@ -268,12 +303,23 @@ def main():
 
         print(f"Balanced Dice: {e1/n} || Random Dice: {e2/n}")
 
-    sides = 20
+    sides = 6
     d = Dice(sides=sides)
+    thisList = ["One", "Two", "Three", "Four", "Five", "Six"]
+    d.setSidesWithWeights(thisList, [1, 1, 1, 3, 1, 2])
+    total_rolls = [0 for _ in range(sides)]
+    for i in range(100000):
+        total_rolls[thisList.index(d.roll(time=-1, returnType="side"))] += 1
+        if i % 10000 == 0:
+            print(f"The total {i} / 100000")
+    print(total_rolls)
 
-    Convergence(d, None, sides, 10000, output = True)
-    Probability(d, None, sides, 1000000, output = False)
-    ExpectedValue(d, None, sides, 1000000, output = False)
+    d.writeCache()
+    d.readCache()
+
+    # Convergence(d, None, sides, 10000, output = True)
+    # Probability(d, None, sides, 1000000, output = False)
+    # ExpectedValue(d, None, sides, 1000000, output = False)
 
 if __name__ == "__main__":
     main()

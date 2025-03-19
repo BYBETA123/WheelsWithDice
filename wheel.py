@@ -1,9 +1,10 @@
 import pygame
 import datetime
 from dice import Dice
+import threading # we need this to take comand line inputs
 
 class multiline:
-    def __init__(self, text, font = None, color = (255, 255, 255), width = 600):
+    def __init__(self, text = "Default text", font = None, color = (255, 255, 255), width = 600):
         self.text = text
         self.font = font
         self.color = color
@@ -48,10 +49,13 @@ class multiline:
 wheelpth = "wheels/"
 # we just start with D6
 filePath = wheelpth + "D6.txt"
+
+# read the file
+print(f"Reading from file: \"{filePath}\"")
+
 with open(filePath, "r") as f:
     text_lines = f.readlines()
 
-print(text_lines)
 text_weights, text_items = [], []
 for l in text_lines:
     try: 
@@ -60,7 +64,7 @@ for l in text_lines:
         text_weights.append(int(line[:a]))
         text_items.append(line[a+1:])
     except:
-        print(f"Error in parsing the line, check the file for any errors\n The line is: {l} and the file is {filePath}\n, The appropriate format: <weight> <text>")
+        print(f"Error in parsing the line, check the file for any errors\n The line is: {l} with path: {filePath}\n, The appropriate format: <weight> <text>")
 
 print(text_weights, text_items)
 dice_lines = text_items
@@ -78,7 +82,6 @@ BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
-# List of text items (these could be loot box rewards or items)
 
 # These sizes probably need to be adjusted
 mainFont = pygame.font.SysFont("Arial", 72)
@@ -92,7 +95,7 @@ fps = 1 / frames  # Frames per second
 globalHide = False
 
 lineMapper = multiline("This is a test of the multiline class", secondaryFont, (255, 255, 255), 550)
-# shorten = Shortline()
+
 def animate_loot_box(spinTime = 10):
 
     def render_text(text, font, multiline = False):
@@ -163,14 +166,11 @@ def animate_loot_box(spinTime = 10):
     selected = False
     base_x = 300
     base_y = 300
-    c = BLACK
     #other variables
     scrollSpeed = 10 # Speed of the scrolling effect
     lFrame = 0 # Frame counter
 
     d = Dice()
-    # dice_lines = ["One", "Two", "Three", "Four", "Five", "Six"]
-    # dice_weights = [1, 1, 1, 3, 1, 2]
     d.setSidesWithWeights(dice_lines, dice_weights)
     # d.setSidesWithWeights(["One is the loneliest number the world has ever seen", "Two is a pear like the fruit but not red like an apple"], [1, 1])
     text_items = d.getItems(hide = globalHide)
@@ -204,6 +204,7 @@ def animate_loot_box(spinTime = 10):
                         lTime = spinning
                         lFrame = 0
                         r = d.roll(time=-1, returnType="side")
+                        print(d.getDetails())
                         searchIndex = findInList(r, text_items)
                         selected = False
                         print("Restarted")
