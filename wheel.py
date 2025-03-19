@@ -1,7 +1,8 @@
 import pygame
 import datetime
 from dice import Dice
-import threading # we need this to take comand line inputs
+import os
+
 
 class multiline:
     def __init__(self, text = "Default text", font = None, color = (255, 255, 255), width = 600):
@@ -43,38 +44,52 @@ class multiline:
     def getHeight(self):
         return sum([line.get_height() for line in self.rendered])
 
+def readFile(filePath):
+    with open(filePath, "r") as f:
+        text_lines = f.readlines()
 
-# we can use D6.txt as an example of a dice that can be used
-# we can use the dice class to create a dice object
+    t_w, t_i = [], []
+    for l in text_lines:
+        try: 
+            line = l.strip()
+            a = line.index(" ")
+            t_w.append(int(line[:a]))
+            t_i.append(line[a+1:])
+        except:
+            print(f"Error in parsing the line, check the file for any errors\n The line is: {l} with path: {filePath}\n, The appropriate format: <weight> <text>")
+    return t_w, t_i
+
+# actual start of program
+
 wheelpth = "wheels/"
-# we just start with D6
-filePath = wheelpth + "D6.txt"
+
+# Get the file path from the user
+while True:
+    folderpath = input("Enter the folder path (Default = Monopoly): ")
+    if folderpath in os.listdir(wheelpth):
+        break
+    if folderpath == "":
+        folderpath = "Monopoly"
+        break
+    print(f"Folder \"{folderpath}\" not found, please try again")
+folderpath += "/"
+
+# find any file within the folder
+files = os.listdir(wheelpth + folderpath)
+global filePath
+filePath = wheelpth + folderpath + files[0]
 
 # read the file
 print(f"Reading from file: \"{filePath}\"")
 
-with open(filePath, "r") as f:
-    text_lines = f.readlines()
-
-text_weights, text_items = [], []
-for l in text_lines:
-    try: 
-        line = l.strip()
-        a = line.index(" ")
-        text_weights.append(int(line[:a]))
-        text_items.append(line[a+1:])
-    except:
-        print(f"Error in parsing the line, check the file for any errors\n The line is: {l} with path: {filePath}\n, The appropriate format: <weight> <text>")
-
+text_weights, text_items = readFile(filePath)
 print(text_weights, text_items)
-dice_lines = text_items
-dice_weights = text_weights
 
 # Initialize Pygame
 pygame.init()
 # Set screen dimensions and title
 screen = pygame.display.set_mode((600, 600))
-bg = pygame.image.load("bg.png")
+bg = pygame.image.load("assets/bg.png")
 pygame.display.set_caption('Scrollable Loot Box Animation - Text')
 
 # Define colors
@@ -97,7 +112,6 @@ globalHide = False
 lineMapper = multiline("This is a test of the multiline class", secondaryFont, (255, 255, 255), 550)
 
 def animate_loot_box(spinTime = 10):
-
     def render_text(text, font, multiline = False):
         if multiline:
             return lineMapper.update(text).getRendered()
@@ -120,11 +134,7 @@ def animate_loot_box(spinTime = 10):
     def winner():
         # This should bring up a box which shows the correct answer in full
         # create the box
-
-        c = GREEN
-        # screen.fill(c)  # Clear the screen
         t = getText(rendered_texts, index)
-        # screen.blit(getText(rendered_texts, index), (base_x - getText(rendered_texts, index).get_width()//2, base_y - getText(rendered_texts, index).get_height()//2))
         screen.blit(t, (base_x - t.get_width()//2, base_y - t.get_height()//2))
 
         pygame.draw.rect(screen, GREEN, (base_x - t.get_width()//2, base_y - t.get_height()//2, t.get_width(), t.get_height()), 1)
@@ -144,20 +154,21 @@ def animate_loot_box(spinTime = 10):
             screen.blit(l, (25, h))
             h+=l.get_height()
 
-
-
     def scrollFunc(percentage):
         return ((0.013*percentage**(1.5) + 1))
 
     def drawOptions():
         x = 10
         y = 10
-        for i in range(len(text_items)):
-            # screen.blit(small_texts[i][0], (x, y))
-            for j in range(len(small_texts[i])):
-                screen.blit(small_texts[i][j], (x, y))
-                y += small_texts[i][j].get_height()
+        screen.blit(smallFont.render(files[currentFile], True, WHITE), (x, y))
 
+    def findInList(item, lst):
+        print(item, lst)
+        for i in range(len(lst)):
+            if item in lst[i]:
+                return i
+        return -1
+    
     running = True
     index = 0  # Index of the current
     spinning = datetime.datetime.now() # start the timer
@@ -169,22 +180,15 @@ def animate_loot_box(spinTime = 10):
     #other variables
     scrollSpeed = 10 # Speed of the scrolling effect
     lFrame = 0 # Frame counter
-
+    currentFile = 0 # file counter
     d = Dice()
-    d.setSidesWithWeights(dice_lines, dice_weights)
+    global filePath
+    text_weights, text_items = readFile(filePath)
+    d.setSidesWithWeights(text_items, text_weights)
     # d.setSidesWithWeights(["One is the loneliest number the world has ever seen", "Two is a pear like the fruit but not red like an apple"], [1, 1])
     text_items = d.getItems(hide = globalHide)
-
     r = d.roll(time=-1, returnType="side")
     print(text_items)
-
-    def findInList(item, lst):
-        print(item, lst)
-        for i in range(len(lst)):
-            if item in lst[i]:
-                return i
-        return -1
-        
     searchIndex = findInList(r, text_items)
     rendered_texts = [render_text(text, mainFont) for text in text_items]
     secondary_texts = [render_text(text, secondaryFont) for text in text_items]
@@ -210,23 +214,48 @@ def animate_loot_box(spinTime = 10):
                         print("Restarted")
                 if event.key == pygame.K_i:
                     print(pygame.mouse.get_pos())
+                if selected and (event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT):
+                    if event.key == pygame.K_LEFT:
+                        currentFile = (currentFile - 1) % len(files)
+                        print("Moving left")
+                    if event.key == pygame.K_RIGHT:
+                        currentFile = (currentFile + 1) % len(files)
+                        print("Moving right")
+                    
+                    print(f"Reading from file: \"{files[currentFile]}\"")
+                    filePath = wheelpth + folderpath + files[currentFile]
+                    text_weights, text_items = readFile(filePath)
+                    d.setSidesWithWeights(text_items, text_weights)
+                    # d.setSidesWithWeights(["One is the loneliest number the world has ever seen", "Two is a pear like the fruit but not red like an apple"], [1, 1])
+                    text_items = d.getItems(hide = globalHide)
+                    r = d.roll(time=-1, returnType="side")
+                    print(text_items)
+                    index = 0 # reset the index
+                    searchIndex = findInList(r, text_items)
+                    rendered_texts = [render_text(text, mainFont) for text in text_items]
+                    secondary_texts = [render_text(text, secondaryFont) for text in text_items]
+                    small_texts = [render_text(text, smallFont, multiline=True) for text in text_items]
+                    # because of this, we need to reset the text
+                    screen.fill(BLACK)
+                    # new drawing code
+                    screen.blit(bg, (0,0))
+                    pygame.draw.circle(screen, BLACK, (300, 300), 200)
+                    pygame.draw.circle(screen, WHITE, (300, 300), 200, 10)
+
+                    # Only show 3 items
+                    screen.blit(getText(secondary_texts, index - 1), (base_x - getText(secondary_texts, index - 1).get_width()//2, base_y - getText(secondary_texts, index - 1).get_height()*2.5))
+                    screen.blit(getText(rendered_texts, index), (base_x - getText(rendered_texts, index).get_width()//2, base_y - getText(rendered_texts, index).get_height()//2))
+                    screen.blit(getText(secondary_texts, index + 1), (base_x - getText(secondary_texts, index + 1).get_width()//2, base_y + getText(secondary_texts, index + 1).get_height()*1.5 ))
+
 
         if datetime.datetime.now() - lTime > datetime.timedelta(seconds=fps):
             lTime = datetime.datetime.now() # Resetting the timer
             #frame update
             percentage = (lTime-spinning) / datetime.timedelta(seconds=spinTime) * 100
-
-            scrollSpeed = scrollFunc(percentage) # needs to return an integer
+            scrollSpeed = int(min(scrollFunc(percentage), 40)) # 25 is the minimum speed
 
             if lFrame > scrollSpeed and not selected:
                 lFrame = 0
-
-                if int(percentage) == 100:
-                    # if we hit the exact number
-                    if ((searchIndex+1)%len(text_items) == index):
-                        # this is in case we are just one over
-                        print("Sike")
-                        index = searchIndex
 
                 selected = (percentage >= 100) and (index == searchIndex)
 
@@ -244,19 +273,14 @@ def animate_loot_box(spinTime = 10):
                 screen.blit(getText(rendered_texts, index), (base_x - getText(rendered_texts, index).get_width()//2, base_y - getText(rendered_texts, index).get_height()//2))
                 screen.blit(getText(secondary_texts, index + 1), (base_x - getText(secondary_texts, index + 1).get_width()//2, base_y + getText(secondary_texts, index + 1).get_height()*1.5 ))
 
-                # drawOptions()
+                drawOptions()
 
             if selected: # in case it didn't actually reach 100%
 
                 winner()
-                # drawOptions()
+                drawOptions()
     
                 pass
-
-            # draw the list of options
-            # draw centering lines
-            # pygame.draw.line(screen, WHITE, (300, 0), (400, 600), 1)
-            # pygame.draw.line(screen, WHITE, (0, 300), (800, 300), 1)
 
             pygame.display.flip()  # Update the screen
             lFrame += 1
