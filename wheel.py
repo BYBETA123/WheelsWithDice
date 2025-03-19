@@ -193,6 +193,7 @@ def animate_loot_box(spinTime = 10):
     rendered_texts = [render_text(text, mainFont) for text in text_items]
     secondary_texts = [render_text(text, secondaryFont) for text in text_items]
     small_texts = [render_text(text, smallFont, multiline=True) for text in text_items]
+    rigged = -1
 
     while running:
         for event in pygame.event.get():
@@ -201,8 +202,42 @@ def animate_loot_box(spinTime = 10):
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     running = False
+                # we want the ability to rig the wheel (Don't tell anyone)
+                if event.key == pygame.K_1 or event.key == pygame.K_KP1: # key 1
+                    rigged = 0
+                    print(f"RIGGED: {text_items[rigged%len(text_items)]}")
+                if event.key == pygame.K_2 or event.key == pygame.K_KP2: # key 2
+                    rigged += 1
+                    print(f"RIGGED: {text_items[rigged%len(text_items)]}")
+                if event.key == pygame.K_3 or event.key == pygame.K_KP3: # key 3
+                    rigged += 2
+                    print(f"RIGGED: {text_items[rigged%len(text_items)]}")
+                if event.key == pygame.K_4 or event.key == pygame.K_KP4: # key 4
+                    rigged += 3
+                    print(f"RIGGED: {text_items[rigged%len(text_items)]}")
+                if event.key == pygame.K_5 or event.key == pygame.K_KP5: # key 5
+                    rigged += 4
+                    print(f"RIGGED: {text_items[rigged%len(text_items)]}")
+                if event.key == pygame.K_6 or event.key == pygame.K_KP6: # key 6
+                    rigged += 5
+                    print(f"RIGGED: {text_items[rigged%len(text_items)]}")
+                if event.key == pygame.K_7 or event.key == pygame.K_KP7: # key 7
+                    rigged += 6
+                    print(f"RIGGED: {text_items[rigged%len(text_items)]}")
+                if event.key == pygame.K_8 or event.key == pygame.K_KP8: # key 8
+                    rigged += 7
+                    print(f"RIGGED: {text_items[rigged%len(text_items)]}")
+                if event.key == pygame.K_9 or event.key == pygame.K_KP9: # key 9
+                    rigged += 8
+                    print(f"RIGGED: {text_items[rigged%len(text_items)]}")
+                if event.key == pygame.K_0 or event.key == pygame.K_KP0: # key 0
+                    rigged += 9
+                    print(f"RIGGED: {text_items[rigged%len(text_items)]}")
+
+
                 if event.key == pygame.K_SPACE:
                     if selected:
+
                         percentage = 0
                         spinning = datetime.datetime.now() # Resetting the timer
                         lTime = spinning
@@ -210,6 +245,8 @@ def animate_loot_box(spinTime = 10):
                         r = d.roll(time=-1, returnType="side")
                         print(d.getDetails())
                         searchIndex = findInList(r, text_items)
+                        if rigged != -1:
+                            searchIndex = rigged
                         selected = False
                         print("Restarted")
                 if event.key == pygame.K_i:
@@ -246,7 +283,6 @@ def animate_loot_box(spinTime = 10):
                     screen.blit(getText(secondary_texts, index - 1), (base_x - getText(secondary_texts, index - 1).get_width()//2, base_y - getText(secondary_texts, index - 1).get_height()*2.5))
                     screen.blit(getText(rendered_texts, index), (base_x - getText(rendered_texts, index).get_width()//2, base_y - getText(rendered_texts, index).get_height()//2))
                     screen.blit(getText(secondary_texts, index + 1), (base_x - getText(secondary_texts, index + 1).get_width()//2, base_y + getText(secondary_texts, index + 1).get_height()*1.5 ))
-
 
         if datetime.datetime.now() - lTime > datetime.timedelta(seconds=fps):
             lTime = datetime.datetime.now() # Resetting the timer
