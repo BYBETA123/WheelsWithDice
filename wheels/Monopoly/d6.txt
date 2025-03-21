@@ -1,6 +1,6 @@
-1 Zero
-1 F
-1 Excigma's brain doesn't exist
-1 B
-1 Vinny's laptop
-1 High lighter
+1 One
+1 Two
+1 Three
+1 Four
+1 Five
+1 Six

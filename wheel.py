@@ -112,6 +112,15 @@ globalHide = False
 lineMapper = multiline("This is a test of the multiline class", secondaryFont, (255, 255, 255), 550)
 
 def animate_loot_box(spinTime = 10):
+
+    oS = spinTime    
+    if spinTime %5 != 0: # fixing input
+        spinTime = round((spinTime)/5)*5 # nearest 5
+    spinTime = max(5, spinTime) # minimum 5 seconds
+    if os != spinTime:
+        print(f"Time set to {spinTime} seconds")
+
+
     def render_text(text, font, multiline = False):
         if multiline:
             return lineMapper.update(text).getRendered()
