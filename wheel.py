@@ -3,7 +3,6 @@ import datetime
 from dice import Dice
 import os
 
-
 class multiline:
     def __init__(self, text = "Default text", font = None, color = (255, 255, 255), width = 600):
         self.text = text
@@ -60,7 +59,6 @@ def readFile(filePath):
     return t_w, t_i
 
 # actual start of program
-
 wheelpth = "wheels/"
 
 # Get the file path from the user
@@ -120,7 +118,6 @@ def animate_loot_box(spinTime = 10):
     if os != spinTime:
         print(f"Time set to {spinTime} seconds")
 
-
     def render_text(text, font, multiline = False):
         if multiline:
             return lineMapper.update(text).getRendered()
@@ -130,7 +127,7 @@ def animate_loot_box(spinTime = 10):
         if font.size(oldText)[0] < 300:
             return font.render(oldText, True, WHITE) # exit early
         tempText = "..." + newText + "..."
-        while (font.size(tempText)[0] > 300):
+        while (font.size(tempText)[0] > 500):
             newText = newText[1:-1]
             tempText = "..." + newText + "..."
         newText = "..." + newText + "..." 
@@ -251,6 +248,7 @@ def animate_loot_box(spinTime = 10):
                         spinning = datetime.datetime.now() # Resetting the timer
                         lTime = spinning
                         lFrame = 0
+                        screen.fill(BLACK)
                         r = d.roll(time=-1, returnType="side")
                         print(d.getDetails())
                         searchIndex = findInList(r, text_items)
@@ -277,6 +275,7 @@ def animate_loot_box(spinTime = 10):
                     r = d.roll(time=-1, returnType="side")
                     print(text_items)
                     index = 0 # reset the index
+                    rigged = 0
                     searchIndex = findInList(r, text_items)
                     rendered_texts = [render_text(text, mainFont) for text in text_items]
                     secondary_texts = [render_text(text, secondaryFont) for text in text_items]
@@ -286,7 +285,7 @@ def animate_loot_box(spinTime = 10):
                     # new drawing code
                     screen.blit(bg, (0,0))
                     pygame.draw.circle(screen, BLACK, (300, 300), 200)
-                    pygame.draw.circle(screen, WHITE, (300, 300), 200, 10)
+                    # pygame.draw.circle(screen, WHITE, (300, 300), 200, 10)
 
                     # Only show 3 items
                     screen.blit(getText(secondary_texts, index - 1), (base_x - getText(secondary_texts, index - 1).get_width()//2, base_y - getText(secondary_texts, index - 1).get_height()*2.5))
@@ -311,21 +310,17 @@ def animate_loot_box(spinTime = 10):
 
                 screen.blit(bg, (0,0))
                 pygame.draw.circle(screen, BLACK, (300, 300), 200)
-                pygame.draw.circle(screen, WHITE, (300, 300), 200, 10)
+                # pygame.draw.circle(screen, WHITE, (300, 300), 200, 10)
 
                 # Only show 3 items
                 screen.blit(getText(secondary_texts, index - 1), (base_x - getText(secondary_texts, index - 1).get_width()//2, base_y - getText(secondary_texts, index - 1).get_height()*2.5))
                 screen.blit(getText(rendered_texts, index), (base_x - getText(rendered_texts, index).get_width()//2, base_y - getText(rendered_texts, index).get_height()//2))
                 screen.blit(getText(secondary_texts, index + 1), (base_x - getText(secondary_texts, index + 1).get_width()//2, base_y + getText(secondary_texts, index + 1).get_height()*1.5 ))
-
                 drawOptions()
 
             if selected: # in case it didn't actually reach 100%
-
                 winner()
                 drawOptions()
-    
-                pass
 
             pygame.display.flip()  # Update the screen
             lFrame += 1
