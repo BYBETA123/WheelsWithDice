@@ -7,9 +7,9 @@ Dice: matplot.lib
 
 ## Usage:
 
-The dice is very customisable being compatible with n sides and also being able to handle weighted sides (such as a loaded die where 5 is more common than any other number)
+The dice is very customisable being compatible with n sides and also being able to handle weighted sides (see wheels/sample/loadedd6.txt)
 
-The wheel inherits the dice which it will use to spin, similar to what appears on wheel of names
+The wheel inherits the dice which it will use to spin, similar to what appears on wheelofnames
 
 ## Why this is different
 

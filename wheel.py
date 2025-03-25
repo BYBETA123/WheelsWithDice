@@ -63,11 +63,11 @@ wheelpth = "wheels/"
 
 # Get the file path from the user
 while True:
-    folderpath = input("Enter the folder path (Default = Monopoly): ")
+    folderpath = input("Enter the folder path (Default = sample): ")
     if folderpath in os.listdir(wheelpth):
         break
     if folderpath == "":
-        folderpath = "Monopoly"
+        folderpath = "sample"
         break
     print(f"Folder \"{folderpath}\" not found, please try again")
 folderpath += "/"
@@ -88,7 +88,7 @@ pygame.init()
 # Set screen dimensions and title
 screen = pygame.display.set_mode((600, 600))
 bg = pygame.image.load("assets/bg.png")
-pygame.display.set_caption('Scrollable Loot Box Animation - Text')
+pygame.display.set_caption('Roulette Animation - Text')
 
 # Define colors
 BLACK = (0, 0, 0)
@@ -242,12 +242,10 @@ def animate_loot_box(spinTime = 10):
 
                 if event.key == pygame.K_SPACE:
                     if selected:
-
                         percentage = 0
                         spinning = datetime.datetime.now() # Resetting the timer
                         lTime = spinning
                         lFrame = 0
-                        screen.fill(BLACK)
                         r = d.roll(time=-1, returnType="side")
                         print(d.getDetails())
                         searchIndex = findInList(r, text_items)
