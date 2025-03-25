@@ -191,7 +191,6 @@ def animate_loot_box(spinTime = 10):
     global filePath
     text_weights, text_items = readFile(filePath)
     d.setSidesWithWeights(text_items, text_weights)
-    # d.setSidesWithWeights(["One is the loneliest number the world has ever seen", "Two is a pear like the fruit but not red like an apple"], [1, 1])
     text_items = d.getItems(hide = globalHide)
     r = d.roll(time=-1, returnType="side")
     print(text_items)
@@ -270,7 +269,6 @@ def animate_loot_box(spinTime = 10):
                     filePath = wheelpth + folderpath + files[currentFile]
                     text_weights, text_items = readFile(filePath)
                     d.setSidesWithWeights(text_items, text_weights)
-                    # d.setSidesWithWeights(["One is the loneliest number the world has ever seen", "Two is a pear like the fruit but not red like an apple"], [1, 1])
                     text_items = d.getItems(hide = globalHide)
                     r = d.roll(time=-1, returnType="side")
                     print(text_items)
@@ -285,7 +283,6 @@ def animate_loot_box(spinTime = 10):
                     # new drawing code
                     screen.blit(bg, (0,0))
                     pygame.draw.circle(screen, BLACK, (300, 300), 200)
-                    # pygame.draw.circle(screen, WHITE, (300, 300), 200, 10)
 
                     # Only show 3 items
                     screen.blit(getText(secondary_texts, index - 1), (base_x - getText(secondary_texts, index - 1).get_width()//2, base_y - getText(secondary_texts, index - 1).get_height()*2.5))
@@ -310,7 +307,6 @@ def animate_loot_box(spinTime = 10):
 
                 screen.blit(bg, (0,0))
                 pygame.draw.circle(screen, BLACK, (300, 300), 200)
-                # pygame.draw.circle(screen, WHITE, (300, 300), 200, 10)
 
                 # Only show 3 items
                 screen.blit(getText(secondary_texts, index - 1), (base_x - getText(secondary_texts, index - 1).get_width()//2, base_y - getText(secondary_texts, index - 1).get_height()*2.5))
